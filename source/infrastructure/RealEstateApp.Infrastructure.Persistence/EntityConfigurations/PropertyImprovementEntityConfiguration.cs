@@ -19,6 +19,6 @@ public class PropertyImprovementEntityConfiguration : IEntityTypeConfiguration<P
         builder.HasOne(pi => pi.Improvement)
             .WithMany(i => i.PropertyImprovements)
             .HasForeignKey(pi => pi.ImprovementId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -1,0 +1,32 @@
+﻿@model RealEstateApp.Core.Application.ViewModels.Catalog.SaleTypeViewModel
+@{
+    ViewData["Title"] = "Delete Sale Type";
+}
+
+<h2 class="section-title"><i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>Delete Sale Type</h2>
+
+<div class="card-real p-4">
+    <p>Are you sure you want to delete this sale type?</p>
+    <ul>
+        <li><strong>Name:</strong> @Model.Name</li>
+        <li><strong>Description:</strong> @Model.Description</li>
+        <li><strong>Properties using it:</strong> @Model.PropertiesCount</li>
+    </ul>
+
+    @if (Model.PropertiesCount > 0)
+    {
+        <div class="alert alert-warning">
+            This sale type is currently used by @Model.PropertiesCount propert(y/ies) and cannot be deleted until those properties are reassigned or removed.
+        </div>
+    }
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn btn-danger">
+            <i class="fa-solid fa-trash me-1"></i>Confirm Delete
+        </button>
+        <a asp-action="Index" class="btn btn-outline-real" style="border-color: var(--color-border); color: var(--color-text-muted);">
+            Cancel
+        </a>
+    </form>
+</div>

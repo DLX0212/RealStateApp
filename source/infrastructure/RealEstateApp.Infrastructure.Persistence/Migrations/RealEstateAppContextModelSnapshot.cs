@@ -378,7 +378,7 @@ namespace RealEstateApp.Infrastructure.Persistence.Migrations
                     b.HasOne("RealEstateApp.Core.Domain.Entities.Improvement", "Improvement")
                         .WithMany("PropertyImprovements")
                         .HasForeignKey("ImprovementId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RealEstateApp.Core.Domain.Entities.Property", "Property")
