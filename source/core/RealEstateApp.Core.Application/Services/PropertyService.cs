@@ -46,6 +46,20 @@ public class PropertyService : IPropertyService
         return result;
     }
 
+    private async Task<List<PropertyDto>> FilterByActiveAgentAsync(List<PropertyDto> properties)
+    {
+        var result = new List<PropertyDto>();
+        foreach (var property in properties)
+        {
+            var agent = await _accountService.GetByIdAsync(property.AgentId);
+            if (agent is not null && agent.IsActive)
+            {
+                result.Add(property);
+            }
+        }
+        return result;
+    }
+
     public async Task<List<PropertyDto>> GetAllAsync()
     {
         var list = await _repository.GetAllWithIncludeAsync(new List<string>
@@ -58,24 +72,30 @@ public class PropertyService : IPropertyService
     public async Task<List<PropertyDto>> GetAvailableAsync()
     {
         var list = await _repository.GetAvailableAsync();
-        return await MapWithAgentAsync(list);
+        var mapped = await MapWithAgentAsync(list);
+        return await FilterByActiveAgentAsync(mapped);
     }
 
     public async Task<List<PropertyDto>> GetAvailableFilteredAsync(PropertyFilterDto filter)
     {
         var list = await _repository.GetAvailableFilteredAsync(filter);
-        return await MapWithAgentAsync(list);
-    }
-
-    public async Task<PropertyDto?> GetByIdAsync(int id)
-    {
-        var entity = await _repository.GetWithDetailsAsync(id);
-        return entity is null ? null : await MapWithAgentAsync(entity);
+        var mapped = await MapWithAgentAsync(list);
+        return await FilterByActiveAgentAsync(mapped);
     }
 
     public async Task<PropertyDto?> GetAvailableByCodeAsync(string code)
     {
         var entity = await _repository.GetAvailableByCodeAsync(code);
+        if (entity is null) return null;
+
+        var dto = await MapWithAgentAsync(entity);
+        var agent = await _accountService.GetByIdAsync(dto.AgentId);
+        return (agent is not null && agent.IsActive) ? dto : null;
+    }
+
+    public async Task<PropertyDto?> GetByIdAsync(int id)
+    {
+        var entity = await _repository.GetWithDetailsAsync(id);
         return entity is null ? null : await MapWithAgentAsync(entity);
     }
 

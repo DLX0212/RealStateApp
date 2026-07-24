@@ -1,8 +1,9 @@
-﻿namespace RealEstateApp.Core.Application.Dtos.Chat;
+﻿using RealEstateApp.Core.Application.Dtos.Common;
 
-public class MessageDto
+namespace RealEstateApp.Core.Application.Dtos.Chat;
+
+public class MessageDto : BasicDto
 {
-    public int Id { get; set; }
     public string Content { get; set; } = default!;
     public string SenderRole { get; set; } = default!;
     public string ClientId { get; set; } = default!;

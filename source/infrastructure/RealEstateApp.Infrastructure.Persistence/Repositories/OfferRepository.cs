@@ -28,14 +28,22 @@ public class OfferRepository : GenericRepository<Offer>, IOfferRepository
             .ToListAsync();
     }
 
-    public async Task<bool> HasPendingOfferAsync(int propertyId, string clientId)
+    public async Task<Offer?> GetPendingByClientAndPropertyAsync(string clientId, int propertyId)
     {
-        return await _dbSet.AnyAsync(o =>
-            o.PropertyId == propertyId && o.ClientId == clientId && o.Status == OfferStatus.Pending);
+        return await _dbSet.FirstOrDefaultAsync(o =>
+            o.ClientId == clientId && o.PropertyId == propertyId && o.Status == OfferStatus.Pending);
     }
 
-    public async Task<bool> HasAcceptedOfferAsync(int propertyId)
+    public async Task<Offer?> GetAcceptedByPropertyAsync(int propertyId)
     {
-        return await _dbSet.AnyAsync(o => o.PropertyId == propertyId && o.Status == OfferStatus.Accepted);
+        return await _dbSet.FirstOrDefaultAsync(o =>
+            o.PropertyId == propertyId && o.Status == OfferStatus.Accepted);
+    }
+
+    public async Task<List<Offer>> GetPendingByPropertyAsync(int propertyId)
+    {
+        return await _dbSet
+            .Where(o => o.PropertyId == propertyId && o.Status == OfferStatus.Pending)
+            .ToListAsync();
     }
 }

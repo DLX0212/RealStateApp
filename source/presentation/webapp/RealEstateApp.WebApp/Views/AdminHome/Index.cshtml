@@ -1,0 +1,72 @@
+﻿@model RealEstateApp.Core.Application.ViewModels.Dashboard.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<h2 class="mb-4"><i class="fa-solid fa-gauge me-2"></i>Dashboard</h2>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card-real p-4">
+            <h5 class="mb-3"><i class="fa-solid fa-house me-2"></i>Properties</h5>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="text-muted small">Available</div>
+                    <div class="fs-3 fw-bold text-success">@Model.AvailableProperties</div>
+                </div>
+                <div>
+                    <div class="text-muted small">Sold</div>
+                    <div class="fs-3 fw-bold text-danger">@Model.SoldProperties</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card-real p-4">
+            <h5 class="mb-3"><i class="fa-solid fa-user-tie me-2"></i>Agents</h5>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="text-muted small">Active</div>
+                    <div class="fs-3 fw-bold text-success">@Model.ActiveAgents</div>
+                </div>
+                <div>
+                    <div class="text-muted small">Inactive</div>
+                    <div class="fs-3 fw-bold text-secondary">@Model.InactiveAgents</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card-real p-4">
+            <h5 class="mb-3"><i class="fa-solid fa-users me-2"></i>Clients</h5>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="text-muted small">Active</div>
+                    <div class="fs-3 fw-bold text-success">@Model.ActiveClients</div>
+                </div>
+                <div>
+                    <div class="text-muted small">Inactive</div>
+                    <div class="fs-3 fw-bold text-secondary">@Model.InactiveClients</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card-real p-4">
+            <h5 class="mb-3"><i class="fa-solid fa-building me-2"></i>Developers</h5>
+            <div class="d-flex justify-content-between">
+                <div>
+                    <div class="text-muted small">Active</div>
+                    <div class="fs-3 fw-bold text-success">@Model.ActiveDevelopers</div>
+                </div>
+                <div>
+                    <div class="text-muted small">Inactive</div>
+                    <div class="fs-3 fw-bold text-secondary">@Model.InactiveDevelopers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

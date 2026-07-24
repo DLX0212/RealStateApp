@@ -19,7 +19,7 @@ public class MessageRepository : GenericRepository<Message>, IMessageRepository
             .ToListAsync();
     }
 
-    public async Task<List<string>> GetClientsWithConversationAsync(int propertyId, string agentId)
+    public async Task<List<string>> GetClientIdsAsync(int propertyId, string agentId)
     {
         return await _dbSet
             .Where(m => m.PropertyId == propertyId && m.AgentId == agentId)

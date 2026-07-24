@@ -25,15 +25,20 @@ public class MessageService : IMessageService
 
     public async Task<List<string>> GetClientsWithConversationAsync(int propertyId, string agentId)
     {
-        return await _repository.GetClientsWithConversationAsync(propertyId, agentId);
+        return await _repository.GetClientIdsAsync(propertyId, agentId);
     }
 
     public async Task<MessageDto> SendAsync(MessageDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Content))
-            throw new InvalidOperationException("You must write a message before sending it.");
+        var entity = new Message
+        {
+            Content = dto.Content,
+            SenderRole = dto.SenderRole,
+            ClientId = dto.ClientId,
+            AgentId = dto.AgentId,
+            PropertyId = dto.PropertyId
+        };
 
-        var entity = _mapper.Map<Message>(dto);
         var created = await _repository.AddAsync(entity);
         return _mapper.Map<MessageDto>(created);
     }

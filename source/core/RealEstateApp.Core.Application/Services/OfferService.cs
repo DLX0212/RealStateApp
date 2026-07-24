@@ -32,33 +32,30 @@ public class OfferService : IOfferService
         return _mapper.Map<List<OfferDto>>(list);
     }
 
-    public async Task<bool> CanSendNewOfferAsync(int propertyId, string clientId)
-    {
-        var property = await _propertyRepository.GetByIdAsync(propertyId);
-        if (property is null || property.Status != PropertyStatus.Available)
-            return false;
-
-        var hasAccepted = await _offerRepository.HasAcceptedOfferAsync(propertyId);
-        if (hasAccepted) return false;
-
-        var hasPending = await _offerRepository.HasPendingOfferAsync(propertyId, clientId);
-        return !hasPending;
-    }
-
-    public async Task<OfferDto> CreateAsync(OfferDto dto)
+    public async Task<OfferDto> CreateAsync(SaveOfferDto dto)
     {
         if (dto.Amount <= 0)
-            throw new InvalidOperationException("The offer amount must be a numeric value greater than zero.");
+            throw new InvalidOperationException("The offer amount must be greater than zero.");
 
-        var canSend = await CanSendNewOfferAsync(dto.PropertyId, dto.ClientId);
-        if (!canSend)
-            throw new InvalidOperationException("You cannot send a new offer for this property right now.");
+        var property = await _propertyRepository.GetByIdAsync(dto.PropertyId)
+            ?? throw new KeyNotFoundException("The requested property does not exist.");
+
+        if (property.Status == PropertyStatus.Sold)
+            throw new InvalidOperationException("This property has already been sold and cannot receive new offers.");
+
+        var acceptedOffer = await _offerRepository.GetAcceptedByPropertyAsync(dto.PropertyId);
+        if (acceptedOffer is not null)
+            throw new InvalidOperationException("This property already has an accepted offer.");
+
+        var pendingOffer = await _offerRepository.GetPendingByClientAndPropertyAsync(dto.ClientId, dto.PropertyId);
+        if (pendingOffer is not null)
+            throw new InvalidOperationException("You already have a pending offer for this property.");
 
         var entity = new Offer
         {
             Amount = dto.Amount,
-            ClientId = dto.ClientId,
             PropertyId = dto.PropertyId,
+            ClientId = dto.ClientId,
             Status = OfferStatus.Pending
         };
 
@@ -74,27 +71,22 @@ public class OfferService : IOfferService
         if (offer.Status != OfferStatus.Pending)
             throw new InvalidOperationException("This offer has already been answered.");
 
-        var property = await _propertyRepository.GetByIdAsync(offer.PropertyId)
-            ?? throw new KeyNotFoundException("The related property does not exist.");
-
-        if (property.Status != PropertyStatus.Available)
-            throw new InvalidOperationException("A property that has already been sold cannot accept a new offer.");
-
-        // Aceptar esta oferta
         offer.Status = OfferStatus.Accepted;
         await _offerRepository.UpdateAsync(offer.Id, offer);
 
-        // Rechazar el resto de ofertas pendientes de la propiedad
-        var otherOffers = await _offerRepository.GetByPropertyAsync(offer.PropertyId);
-        foreach (var other in otherOffers.Where(o => o.Id != offer.Id && o.Status == OfferStatus.Pending))
+        var otherPending = await _offerRepository.GetPendingByPropertyAsync(offer.PropertyId);
+        foreach (var pending in otherPending.Where(o => o.Id != offer.Id))
         {
-            other.Status = OfferStatus.Rejected;
-            await _offerRepository.UpdateAsync(other.Id, other);
+            pending.Status = OfferStatus.Rejected;
+            await _offerRepository.UpdateAsync(pending.Id, pending);
         }
 
-        // Marcar la propiedad como vendida
-        property.Status = PropertyStatus.Sold;
-        await _propertyRepository.UpdateAsync(property.Id, property);
+        var property = await _propertyRepository.GetByIdAsync(offer.PropertyId);
+        if (property is not null)
+        {
+            property.Status = PropertyStatus.Sold;
+            await _propertyRepository.UpdateAsync(property.Id, property);
+        }
     }
 
     public async Task RejectAsync(int offerId)

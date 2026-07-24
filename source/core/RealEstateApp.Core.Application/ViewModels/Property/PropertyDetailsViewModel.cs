@@ -1,4 +1,7 @@
-﻿namespace RealEstateApp.Core.Application.ViewModels.Property;
+﻿using RealEstateApp.Core.Application.ViewModels.Chat;
+using RealEstateApp.Core.Application.ViewModels.Offer;
+
+namespace RealEstateApp.Core.Application.ViewModels.Property;
 
 public class PropertyDetailsViewModel
 {
@@ -12,6 +15,7 @@ public class PropertyDetailsViewModel
     public int Bathrooms { get; set; }
     public string Description { get; set; } = default!;
     public string Status { get; set; } = default!;
+
     public List<string> ImagePaths { get; set; } = new();
     public List<string> Improvements { get; set; } = new();
 
@@ -20,8 +24,14 @@ public class PropertyDetailsViewModel
     public string? AgentPhone { get; set; }
     public string? AgentEmail { get; set; }
     public string? AgentProfilePicturePath { get; set; }
+
     public bool IsFavorite { get; set; }
-    public List<Chat.ConversationViewModel>? Conversation { get; set; }
-    public List<Offer.OfferViewModel>? MyOffers { get; set; }
-    public bool CanSendNewOffer { get; set; }
+
+    public List<ConversationViewModel> Messages { get; set; } = new();
+    public SendMessageViewModel NewMessage { get; set; } = new();
+
+    public List<OfferViewModel> Offers { get; set; } = new();
+    public SendOfferViewModel NewOffer { get; set; } = new();
+    public bool CanCreateOffer { get; set; }
+    public string? OfferBlockedReason { get; set; }
 }

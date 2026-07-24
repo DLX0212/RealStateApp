@@ -1,0 +1,59 @@
+﻿@model List<RealEstateApp.Core.Application.ViewModels.Agent.AgentAdminViewModel>
+@{
+    ViewData["Title"] = "Manage Agents";
+}
+
+<h2 class="section-title"><i class="fa-solid fa-user-tie me-2"></i>Manage Agents</h2>
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">
+        <i class="fa-solid fa-user-slash"></i>
+        <p>@ViewBag.NoResultsMessage</p>
+    </div>
+}
+else
+{
+    <div class="card-real p-0">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Properties</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var agent in Model)
+                {
+                    <tr>
+                        <td>@agent.FirstName</td>
+                        <td>@agent.LastName</td>
+                        <td>@agent.Email</td>
+                        <td>@agent.PropertiesCount</td>
+                        <td>
+                            <span class="badge @(agent.IsActive ? "bg-success" : "bg-secondary")">
+                                @(agent.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <form asp-action="ChangeStatus" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@agent.Id" />
+                                <input type="hidden" name="isActive" value="@(!agent.IsActive)" />
+                                <button type="submit" class="btn btn-sm @(agent.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                    @(agent.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                            </form>
+                            <a asp-action="Delete" asp-route-id="@agent.Id" class="btn btn-sm btn-outline-danger">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

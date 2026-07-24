@@ -53,9 +53,12 @@ public class MappingProfile : Profile
         CreateMap<PropertyDto, PropertyDetailsViewModel>()
             .ForMember(d => d.ImagePaths, o => o.MapFrom(s => s.Images.Select(i => i.Path)))
             .ForMember(d => d.IsFavorite, o => o.Ignore())
-            .ForMember(d => d.Conversation, o => o.Ignore())
-            .ForMember(d => d.MyOffers, o => o.Ignore())
-            .ForMember(d => d.CanSendNewOffer, o => o.Ignore());
+            .ForMember(d => d.Messages, o => o.Ignore())
+            .ForMember(d => d.Offers, o => o.Ignore())
+            .ForMember(d => d.CanCreateOffer, o => o.Ignore())
+            .ForMember(d => d.NewMessage, o => o.Ignore())
+            .ForMember(d => d.NewOffer, o => o.Ignore())
+            .ForMember(d => d.OfferBlockedReason, o => o.Ignore());
 
         CreateMap<PropertyDto, DeletePropertyViewModel>()
             .ForMember(d => d.MainImagePath, o => o.MapFrom(s => s.Images.Select(i => i.Path).FirstOrDefault()));

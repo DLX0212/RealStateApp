@@ -6,6 +6,7 @@ public interface IOfferRepository : IGenericRepository<Offer>
 {
     Task<List<Offer>> GetByPropertyAndClientAsync(int propertyId, string clientId);
     Task<List<Offer>> GetByPropertyAsync(int propertyId);
-    Task<bool> HasPendingOfferAsync(int propertyId, string clientId);
-    Task<bool> HasAcceptedOfferAsync(int propertyId);
+    Task<Offer?> GetPendingByClientAndPropertyAsync(string clientId, int propertyId);
+    Task<Offer?> GetAcceptedByPropertyAsync(int propertyId);
+    Task<List<Offer>> GetPendingByPropertyAsync(int propertyId);
 }
