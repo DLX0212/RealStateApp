@@ -50,11 +50,23 @@ public class SaleTypeService : ISaleTypeService
 
     public async Task DeleteAsync(int id)
     {
+        var entity = await _repository.GetByIdWithIncludeAsync(id, new List<string> { nameof(SaleType.Properties) })
+            ?? throw new KeyNotFoundException("The requested sale type does not exist.");
+
+        if (entity.Properties.Count > 0)
+            throw new InvalidOperationException("This sale type cannot be deleted because it has properties associated with it.");
+
         await _repository.DeleteAsync(id);
     }
 
     public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null)
     {
         return await _repository.ExistsByNameAsync(name, excludeId);
+    }
+
+    public async Task<int> GetPropertiesCountAsync(int id)
+    {
+        var entity = await _repository.GetByIdWithIncludeAsync(id, new List<string> { nameof(SaleType.Properties) });
+        return entity?.Properties.Count ?? 0;
     }
 }

@@ -9,6 +9,8 @@ using RealEstateApp.Core.Application.ViewModels.Chat;
 using RealEstateApp.Core.Application.ViewModels.Offer;
 using RealEstateApp.Core.Application.ViewModels.Property;
 using RealEstateApp.Core.Domain.Entities;
+using RealEstateApp.Core.Application.Dtos.Account;
+using RealEstateApp.Core.Application.ViewModels.Account;
 
 namespace RealEstateApp.Core.Application.Mappings;
 
@@ -30,6 +32,10 @@ public class MappingProfile : Profile
         CreateMap<Improvement, ImprovementDto>()
             .ForMember(d => d.PropertiesCount, o => o.MapFrom(s => s.PropertyImprovements.Count))
             .ReverseMap();
+        CreateMap<ImprovementDto, ImprovementViewModel>().ReverseMap();
+
+        CreateMap<PropertyTypeDto, PropertyTypeViewModel>().ReverseMap();
+        CreateMap<SaleTypeDto, SaleTypeViewModel>().ReverseMap();
         CreateMap<ImprovementDto, ImprovementViewModel>().ReverseMap();
 
         // Property
@@ -81,5 +87,12 @@ public class MappingProfile : Profile
             .ReverseMap()
             .ForMember(d => d.Status, o => o.Ignore());
         CreateMap<OfferDto, OfferViewModel>().ReverseMap();
+
+        // Account
+        CreateMap<AdminUserDto, AdminUserViewModel>().ReverseMap();
+        CreateMap<SaveAdminUserViewModel, SaveAdminUserDto>().ReverseMap();
+
+        CreateMap<DeveloperUserDto, DeveloperUserViewModel>().ReverseMap();
+        CreateMap<SaveDeveloperUserViewModel, SaveDeveloperUserDto>().ReverseMap();
     }
 }

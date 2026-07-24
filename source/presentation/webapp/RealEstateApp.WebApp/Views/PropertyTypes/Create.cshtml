@@ -3,30 +3,23 @@
     ViewData["Title"] = "New Property Type";
 }
 
-<h2 class="section-title"><i class="fa-solid fa-plus me-2"></i>New Property Type</h2>
+<h2 class="section-title"><i class="fa-solid fa-house-chimney me-2"></i>New Property Type</h2>
 
-<div class="card-real p-4">
+<div class="card-real">
     <form asp-action="Create" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="mb-3">
             <label asp-for="Name" class="form-label"></label>
             <input asp-for="Name" class="form-control" />
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
-
         <div class="mb-3">
             <label asp-for="Description" class="form-label"></label>
             <textarea asp-for="Description" class="form-control" rows="3"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
-
-        <button type="submit" class="btn btn-real">
-            <i class="fa-solid fa-check me-1"></i>Save
-        </button>
-        <a asp-action="Index" class="btn btn-outline-real" style="border-color: var(--color-border); color: var(--color-text-muted);">
-            Cancel
-        </a>
+        <button type="submit" class="btn btn-real">Save</button>
+        <a asp-action="Index" class="btn btn-outline-real">Cancel</a>
     </form>
 </div>
 

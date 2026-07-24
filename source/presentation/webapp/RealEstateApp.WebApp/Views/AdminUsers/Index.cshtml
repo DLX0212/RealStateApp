@@ -1,0 +1,77 @@
+﻿@model List<RealEstateApp.Core.Application.ViewModels.Account.AdminUserViewModel>
+@{
+    ViewData["Title"] = "Manage Administrators";
+    var currentUserId = ViewBag.CurrentUserId as string;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="section-title mb-0"><i class="fa-solid fa-user-shield me-2"></i>Manage Administrators</h2>
+    <a asp-action="Create" class="btn btn-real"><i class="fa-solid fa-plus me-1"></i>New Administrator</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+@if (Model.Count == 0)
+{
+    <div class="empty-state">
+        <i class="fa-solid fa-user-slash"></i>
+        <p>@ViewBag.NoResultsMessage</p>
+    </div>
+}
+else
+{
+    <div class="card-real p-0">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var admin in Model)
+                {
+                    <tr>
+                        <td>@admin.UserName</td>
+                        <td>@admin.FirstName</td>
+                        <td>@admin.LastName</td>
+                        <td>@admin.Email</td>
+                        <td>
+                            <span class="badge @(admin.IsActive ? "bg-success" : "bg-secondary")">
+                                @(admin.IsActive ? "Active" : "Inactive")
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            @if (admin.Id == currentUserId)
+                            {
+                                <span class="text-muted small">Current user</span>
+                            }
+                            else
+                            {
+                                <a asp-action="Edit" asp-route-id="@admin.Id" class="btn btn-sm btn-outline-real">Edit</a>
+                                <form asp-action="ChangeStatus" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@admin.Id" />
+                                    <input type="hidden" name="isActive" value="@(!admin.IsActive)" />
+                                    <button type="submit" class="btn btn-sm @(admin.IsActive ? "btn-outline-secondary" : "btn-outline-success")">
+                                        @(admin.IsActive ? "Deactivate" : "Activate")
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

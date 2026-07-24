@@ -34,6 +34,8 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IAgentService, AgentService>();
+        services.AddScoped<IAdminUserService, AdminUserService>();
+        services.AddScoped<IDeveloperService, DeveloperService>();
 
         var jwtSettings = configuration.GetSection("JwtSettings");
         var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured.");

@@ -16,4 +16,13 @@ public class ImprovementRepository : GenericRepository<Improvement>, IImprovemen
         return await _dbSet.AnyAsync(p =>
             p.Name.ToLower() == name.ToLower() && (excludeId == null || p.Id != excludeId));
     }
+
+    public async Task RemoveRelationsAsync(int improvementId)
+    {
+        var relations = _context.PropertyImprovements
+            .Where(pi => pi.ImprovementId == improvementId);
+
+        _context.PropertyImprovements.RemoveRange(relations);
+        await _context.SaveChangesAsync();
+    }
 }

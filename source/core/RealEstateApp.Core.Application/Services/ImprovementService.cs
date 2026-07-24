@@ -50,6 +50,10 @@ public class ImprovementService : IImprovementService
 
     public async Task DeleteAsync(int id)
     {
+        var entity = await _repository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException("The requested improvement does not exist.");
+
+        await _repository.RemoveRelationsAsync(id);
         await _repository.DeleteAsync(id);
     }
 

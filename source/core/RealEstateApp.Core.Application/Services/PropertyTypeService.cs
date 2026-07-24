@@ -50,11 +50,22 @@ public class PropertyTypeService : IPropertyTypeService
 
     public async Task DeleteAsync(int id)
     {
+        var entity = await _repository.GetByIdWithIncludeAsync(id, new List<string> { nameof(PropertyType.Properties) })
+            ?? throw new KeyNotFoundException("The requested property type does not exist.");
+
+        if (entity.Properties.Count > 0)
+            throw new InvalidOperationException("This property type cannot be deleted because it has properties associated with it.");
+
         await _repository.DeleteAsync(id);
     }
-
     public async Task<bool> ExistsByNameAsync(string name, int? excludeId = null)
     {
         return await _repository.ExistsByNameAsync(name, excludeId);
+    }
+
+    public async Task<int> GetPropertiesCountAsync(int id)
+    {
+        var entity = await _repository.GetByIdWithIncludeAsync(id, new List<string> { nameof(PropertyType.Properties) });
+        return entity?.Properties.Count ?? 0;
     }
 }

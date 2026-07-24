@@ -1,15 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using RealEstateApp.Core.Application.ViewModels.Common;
 
 namespace RealEstateApp.Core.Application.ViewModels.Catalog;
 
-public class PropertyTypeViewModel : BasicViewModel
+public class PropertyTypeViewModel
 {
+    public int Id { get; set; }
+
     [Required(ErrorMessage = "Name is required.")]
+    [StringLength(50)]
     public string Name { get; set; } = default!;
 
-    [Required(ErrorMessage = "Description is required.")]
-    public string Description { get; set; } = default!;
+    [StringLength(250)]
+    public string? Description { get; set; }
 
     public int PropertiesCount { get; set; }
 }

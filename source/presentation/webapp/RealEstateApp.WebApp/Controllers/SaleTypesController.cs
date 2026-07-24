@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using RealEstateApp.Core.Application.Dtos.Catalog;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Core.Application.ViewModels.Catalog;
@@ -11,37 +11,27 @@ namespace RealEstateApp.WebApp.Controllers;
 public class SaleTypesController : Controller
 {
     private readonly ISaleTypeService _service;
+    private readonly IMapper _mapper;
 
-    public SaleTypesController(ISaleTypeService service)
+    public SaleTypesController(ISaleTypeService service, IMapper mapper)
     {
         _service = service;
+        _mapper = mapper;
     }
 
     public async Task<IActionResult> Index()
     {
-        var dtos = await _service.GetAllAsync();
+        var list = await _service.GetAllAsync();
 
-        if (dtos.Count == 0)
+        if (list.Count == 0)
         {
             ViewBag.NoResultsMessage = "There are no sale types registered at this time.";
         }
 
-        var items = dtos.Select(d => new SaleTypeViewModel
-        {
-            Id = d.Id,
-            Name = d.Name,
-            Description = d.Description,
-            PropertiesCount = d.PropertiesCount
-        }).ToList();
-
-        return View(items);
+        return View(_mapper.Map<List<SaleTypeViewModel>>(list));
     }
 
-    [HttpGet]
-    public IActionResult Create()
-    {
-        return View(new SaleTypeViewModel());
-    }
+    public IActionResult Create() => View(new SaleTypeViewModel());
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -52,19 +42,13 @@ public class SaleTypesController : Controller
             ModelState.AddModelError(nameof(vm.Name), "A sale type with this name already exists.");
         }
 
-        if (!ModelState.IsValid)
-        {
-            return View(vm);
-        }
+        if (!ModelState.IsValid) return View(vm);
 
-        var dto = new SaleTypeDto { Name = vm.Name, Description = vm.Description };
-        await _service.CreateAsync(dto);
-
+        await _service.CreateAsync(_mapper.Map<SaleTypeDto>(vm));
         TempData["SuccessMessage"] = "The sale type was created successfully.";
         return RedirectToAction(nameof(Index));
     }
 
-    [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
         var dto = await _service.GetByIdAsync(id);
@@ -74,52 +58,33 @@ public class SaleTypesController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        var vm = new SaleTypeViewModel
-        {
-            Id = dto.Id,
-            Name = dto.Name,
-            Description = dto.Description,
-            PropertiesCount = dto.PropertiesCount
-        };
-
-        return View(vm);
+        return View(_mapper.Map<SaleTypeViewModel>(dto));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, SaleTypeViewModel vm)
+    public async Task<IActionResult> Edit(SaleTypeViewModel vm)
     {
-        if (id != vm.Id)
-        {
-            TempData["ErrorMessage"] = "The requested sale type does not exist.";
-            return RedirectToAction(nameof(Index));
-        }
-
         if (await _service.ExistsByNameAsync(vm.Name, vm.Id))
         {
             ModelState.AddModelError(nameof(vm.Name), "A sale type with this name already exists.");
         }
 
-        if (!ModelState.IsValid)
-        {
-            return View(vm);
-        }
+        if (!ModelState.IsValid) return View(vm);
 
         try
         {
-            var dto = new SaleTypeDto { Id = vm.Id, Name = vm.Name, Description = vm.Description };
-            await _service.UpdateAsync(id, dto);
+            await _service.UpdateAsync(vm.Id, _mapper.Map<SaleTypeDto>(vm));
             TempData["SuccessMessage"] = "The sale type was updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
         catch (KeyNotFoundException ex)
         {
             TempData["ErrorMessage"] = ex.Message;
+            return RedirectToAction(nameof(Index));
         }
-
-        return RedirectToAction(nameof(Index));
     }
 
-    [HttpGet]
     public async Task<IActionResult> Delete(int id)
     {
         var dto = await _service.GetByIdAsync(id);
@@ -129,15 +94,7 @@ public class SaleTypesController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        var vm = new SaleTypeViewModel
-        {
-            Id = dto.Id,
-            Name = dto.Name,
-            Description = dto.Description,
-            PropertiesCount = dto.PropertiesCount
-        };
-
-        return View(vm);
+        return View(_mapper.Map<SaleTypeViewModel>(dto));
     }
 
     [HttpPost, ActionName("Delete")]
@@ -149,9 +106,13 @@ public class SaleTypesController : Controller
             await _service.DeleteAsync(id);
             TempData["SuccessMessage"] = "The sale type was deleted successfully.";
         }
-        catch (DbUpdateException)
+        catch (KeyNotFoundException ex)
         {
-            TempData["ErrorMessage"] = "This sale type cannot be deleted because it has properties associated with it. Reassign or remove those properties first.";
+            TempData["ErrorMessage"] = ex.Message;
+        }
+        catch (InvalidOperationException ex)
+        {
+            TempData["ErrorMessage"] = ex.Message;
         }
 
         return RedirectToAction(nameof(Index));
