@@ -7,15 +7,21 @@ using RealEstateApp.Infrastructure.Identity.Context;
 using RealEstateApp.Infrastructure.Identity.Entities;
 using RealEstateApp.Infrastructure.Identity.Seeds;
 using RealEstateApp.Infrastructure.Persistence;
+using RealEstateApp.Infrastructure.Persistence.Context;
+using RealEstateApp.WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Capas del proyecto
 builder.Services.AddApplicationLayer();
 builder.Services.AddPersistenceLayer(builder.Configuration);
 builder.Services.AddIdentityLayer(builder.Configuration);
 
 builder.Services.AddControllers();
+
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -46,13 +52,14 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
-// Seed de roles y usuarios por defecto al iniciar
+app.UseGlobalExceptionHandling();
+
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var identityContext = scope.ServiceProvider.GetRequiredService<IdentityContext>();
-    var realEstateContext = scope.ServiceProvider.GetRequiredService<RealEstateApp.Infrastructure.Persistence.Context.RealEstateAppContext>();
+    var realEstateContext = scope.ServiceProvider.GetRequiredService<RealEstateAppContext>();
 
     identityContext.Database.Migrate();
     realEstateContext.Database.Migrate();
