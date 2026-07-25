@@ -151,7 +151,11 @@ public class AccountController : Controller
                 RoleName = model.RoleName
             };
 
-            await _accountService.RegisterClientOrAgentAsync(dto);
+            // Generar la URL base para la activación
+            var activationBaseUrl = Url.Action(nameof(ActivateAccount), "Account", null, Request.Scheme);
+
+            // Pasar ambos parámetros al servicio
+            await _accountService.RegisterClientOrAgentAsync(dto, activationBaseUrl);
 
             if (model.RoleName == "Client")
             {
@@ -169,6 +173,30 @@ public class AccountController : Controller
             ModelState.AddModelError(string.Empty, $"It was not possible to complete the registration. {ex.Message}");
             return View(model);
         }
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> ActivateAccount(string userId, string token)
+    {
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(token))
+        {
+            TempData["ErrorMessage"] = "Invalid activation link.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var result = await _accountService.ActivateAccountAsync(userId, token);
+
+        if (result)
+        {
+            TempData["SuccessMessage"] = "Your account has been activated successfully. You can now log in.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Account activation failed or the account is already active.";
+        }
+
+        return RedirectToAction(nameof(Login));
     }
 
     [HttpPost]

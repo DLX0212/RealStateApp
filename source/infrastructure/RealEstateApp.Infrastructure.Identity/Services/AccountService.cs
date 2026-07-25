@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using RealEstateApp.Core.Application.Dtos.Account;
+using RealEstateApp.Core.Application.Interfaces.Infrastructure;
 using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Infrastructure.Identity.Entities;
 
@@ -9,11 +10,13 @@ public class AccountService : IAccountService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IJwtService _jwtService;
+    private readonly IEmailService _emailService;
 
-    public AccountService(UserManager<ApplicationUser> userManager, IJwtService jwtService)
+    public AccountService(UserManager<ApplicationUser> userManager, IJwtService jwtService, IEmailService emailService)
     {
         _userManager = userManager;
         _jwtService = jwtService;
+        _emailService = emailService;
     }
 
     private static UserDto MapToDto(ApplicationUser user, string role)
@@ -63,7 +66,7 @@ public class AccountService : IAccountService
         return await _jwtService.GenerateTokenAsync(user.Id, user.UserName ?? string.Empty, user.Email ?? string.Empty, roles.ToList());
     }
 
-    public async Task<UserDto> RegisterClientOrAgentAsync(RegisterClientAgentDto dto)
+    public async Task<UserDto> RegisterClientOrAgentAsync(RegisterClientAgentDto dto, string? activationBaseUrl)
     {
         var user = new ApplicationUser
         {
@@ -73,7 +76,7 @@ public class AccountService : IAccountService
             ProfilePicturePath = dto.ProfilePicturePath,
             UserName = dto.UserName,
             Email = dto.Email,
-            IsActive = false 
+            IsActive = false
         };
 
         var result = await _userManager.CreateAsync(user, dto.Password);
@@ -85,7 +88,30 @@ public class AccountService : IAccountService
 
         await _userManager.AddToRoleAsync(user, dto.RoleName);
 
+        if (dto.RoleName == "Client" && !string.IsNullOrWhiteSpace(activationBaseUrl))
+        {
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = Uri.EscapeDataString(token);
+            var activationLink = $"{activationBaseUrl}?userId={user.Id}&token={encodedToken}";
+
+            await _emailService.SendActivationEmailAsync(user.Email!, user.FirstName, activationLink);
+        }
+
         return MapToDto(user, dto.RoleName);
+    }
+
+    public async Task<bool> ActivateAccountAsync(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null) return false;
+
+        var decodedToken = Uri.UnescapeDataString(token);
+        var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+        if (!result.Succeeded) return false;
+
+        user.IsActive = true;
+        await _userManager.UpdateAsync(user);
+        return true;
     }
 
     public async Task<UserDto> RegisterAdminOrDeveloperAsync(RegisterAdminDeveloperDto dto)

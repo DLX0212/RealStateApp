@@ -8,6 +8,8 @@ using RealEstateApp.Core.Application.Interfaces.Services;
 using RealEstateApp.Infrastructure.Identity.Context;
 using RealEstateApp.Infrastructure.Identity.Entities;
 using RealEstateApp.Infrastructure.Identity.Services;
+using RealEstateApp.Core.Application.Interfaces.Infrastructure;
+using RealEstateApp.Core.Application.Settings;
 using System.Text;
 
 namespace RealEstateApp.Infrastructure.Identity;
@@ -18,6 +20,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<IdentityContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
 
         services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
         {
@@ -31,6 +34,8 @@ public static class DependencyInjection
         .AddEntityFrameworkStores<IdentityContext>()
         .AddDefaultTokenProviders();
 
+        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IAgentService, AgentService>();
